@@ -15,3 +15,4 @@
 
 Note: Name of project should be the same as the repository since the nuget packages download automatically.
 I will try to add photos.
+IMPORTANT: For now, delete bin and obj files from cloned repository and then build. I will try to add .gitignore file for them.
