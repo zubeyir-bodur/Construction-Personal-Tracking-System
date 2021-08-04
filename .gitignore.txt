@@ -1,3 +1,0 @@
-# Ignore building files
-/bin/*
-/obj/*
