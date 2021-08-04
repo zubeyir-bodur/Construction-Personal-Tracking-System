@@ -2,6 +2,7 @@
 using Construction_Personal_Tracking_System.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,8 +27,8 @@ namespace Construction_Personal_Tracking_System.Controller {
             if(token == null) {
                 return Unauthorized();
             }
-            string jsonToken = JsonConverter.
-            return JsonResult(token);
+            string jsonToken = JsonConvert.SerializeObject(token);
+            return Ok(token);
         }
     }
 }
