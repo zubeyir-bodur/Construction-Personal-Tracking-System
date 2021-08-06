@@ -64,22 +64,37 @@ namespace Construction_Personal_Tracking_System.Controller {
             }
             return Ok("Get method");
         }
+        
 
         /// <summary>
         /// Generates JSON & Excel files for a given area
         /// Includes tracking information of different personnels
         /// Which persennels visited this sector etc.
+        /// The dates are inclusive
         /// </summary>
         /// <author>Zubeyir Bodur</author>
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
-        /// <param name="areaID"></param>
+        /// <param name="areaName">area name that is coming from the front end</param>
         /// 
-        private void FilesArea(DateTime startDate, DateTime endDate, int areaID) {
+        public IActionResult FilesArea(DateTime startDate, DateTime endDate, int? areaId) {
             // 1. filter the trackings table
-
+            // verify if the area exists
+            if (areaId == null)
+                return NotFound();
+            var area = context.Areas.Where(a => a.AreaId == areaId).FirstOrDefault();
+            if (area == null)
+                return NotFound(); // Return NotFound page for now
+            // comparing the entry date and id will be enough
+            var filtered = context.Trackings.Where(t => t.AreaName.Equals(area.AreaName)
+                && t.EntranceDate.CompareTo(startDate) >= 0
+                && t.EntranceDate.CompareTo(endDate) <= 0);
             // 2.1 use json serializer
+            var JsonString = JsonConvert.SerializeObject(filtered.ToList());
+            // TO DO : output the string into a json file 
             // 2.2 generate excel table
+            // TO DO
+            return Ok();
         }
 
         /// <summary>
@@ -90,11 +105,25 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <param name="areaID"></param>
-        private void FilesPersonnel(int personnelID, DateTime startDate, DateTime endDate) {
+        public IActionResult FilesPersonnel(int? personnelID, DateTime startDate, DateTime endDate) {
             // 1. filter the trackings table
-
+            // verify if the personnal exists
+            if (personnelID == null)
+                return NotFound();
+            var personnel = context.Personnel.Where(p => p.PersonnelId == personnelID).FirstOrDefault();
+            if (personnel == null)
+                return NotFound(); // Return NotFound page for now
+            // comparing the entry date and id will be enough
+            var filtered = context.Trackings.Where(t => t.PersonnelId == personnel.PersonnelId
+                && t.EntranceDate.CompareTo(startDate) >= 0
+                && t.EntranceDate.CompareTo(endDate) <= 0);
             // 2.1 use json serializer
+            var JsonString = JsonConvert.SerializeObject(filtered.ToList());
+            // TO DO : output the string into a json file 
             // 2.2 generate excel table
+            // TO DO
+            return Ok();
         }
+
     }
 }
