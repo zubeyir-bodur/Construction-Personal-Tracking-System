@@ -26,6 +26,12 @@ namespace Construction_Personal_Tracking_System.Controller {
             this.context = Context;
         }
 
+        /// <summary>
+        /// Naive authentication for now.
+        /// </summary>
+        /// <author>Furkan Çalık</author>
+        /// <param name="userInfo"></param>
+        /// <returns>Token as json format</returns>
         [AllowAnonymous]
         [HttpPost("authenticate")]
         public IActionResult Login([FromBody] UserInfo userInfo) {
@@ -34,7 +40,19 @@ namespace Construction_Personal_Tracking_System.Controller {
                 return Unauthorized();
             }
             string jsonToken = JsonConvert.SerializeObject(token);
-            return Ok(token);
+            return Ok(jsonToken);
+        }
+
+        /// <summary>
+        /// Registering QR code to database after a user logged in successfully
+        /// </summary>
+        /// <author>Furkan Çalık</author>
+        /// <param name="_QRCode"></param>
+        /// <returns></returns>
+        [HttpPost("registerQRCode")]
+        public IActionResult RegisterQRCode([FromBody] QRCode _QRCode) {
+            // TODO: Add to database and check
+            return Ok();
         }
 
         // Click link to run the method or use postman, paste link and run
