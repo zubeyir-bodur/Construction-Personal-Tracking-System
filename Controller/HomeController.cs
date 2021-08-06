@@ -49,9 +49,25 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// <author>Furkan Çalık</author>
         /// <param name="_QRCode"></param>
         /// <returns></returns>
+        /// http://localhost:5000/home/registerQRCode [POST]
         [HttpPost("registerQRCode")]
         public IActionResult RegisterQRCode([FromBody] QRCode _QRCode) {
-            // TODO: Add to database and check
+            Tracking tracking = new Tracking();
+            Personnel person = context.Personnel.Where(u => u.UserName == _QRCode.Username).FirstOrDefault();
+            PersonnelType type = context.PersonnelTypes.Where(u => u.PersonnelTypeId == person.PersonnelTypeId).FirstOrDefault();
+            Company company = context.Companies.Where(u => u.CompanyName == _QRCode.CompanyName).FirstOrDefault();
+            tracking.PersonnelId = person.PersonnelId;
+            tracking.Name = person.PersonnelName;
+            tracking.Surname = person.PersonnelSurname;
+            tracking.PersonnelId = person.PersonnelId;
+            tracking.PersonnelType = type.PersonnelTypeName;
+            tracking.CompanyName = company.CompanyName;
+            tracking.AutoExit = false;
+            tracking.EntranceDate = DateTime.UtcNow;
+            tracking.ExitDate = null;
+            tracking.AreaName = _QRCode.SectorName;
+            context.Add<Tracking>(tracking);
+            context.SaveChanges();
             return Ok();
         }
 
