@@ -38,28 +38,5 @@ namespace Construction_Personal_Tracking_System.Controller {
             string jsonToken = JsonConvert.SerializeObject(token);
             return Ok(token);
         }
-
-        /**
-         * Check if the user has made entry twice into different sectors, 
-         * then return a flag that they should be automatically exited from
-         * last second sector.
-         * 
-         * If true, they should be exited from that sector
-         */
-        [HttpGet]
-        public private bool IsAutoExit([FromBody] UserInfo userInfo) {
-            // TO DO
-            return false;
-        }
-
-        /**
-         * Check if the user's last visit is an exit or entry.
-         * If true, it's an entry. If false, then it's an exit
-         */
-        [HttpGet]
-        public private bool IsEntry([FromBody] UserInfo userInfo) {
-            // TO DO
-            return false;
-        }
     }
 }
