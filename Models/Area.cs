@@ -1,37 +1,20 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Construction_Personal_Tracking_System.Models;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Drawing;
-using System.ComponentModel.DataAnnotations;
 
-// Change the path later for organization
-namespace Construction_Personal_Tracking_System.Models
+#nullable disable
+
+namespace Construction_Personal_Tracking_System.Deneme
 {
-    public class Area
+    public partial class Area
     {
-        // primary key
-        public int area_id { get; set; }
+        public int AreaId { get; set; }
+        public string AreaName { get; set; }
+        public int CompanyId { get; set; }
+        public string CompanyName { get; set; }
+        public decimal Latitude { get; set; }
+        public decimal Longitude { get; set; }
+        public byte[] QrCode { get; set; }
 
-        // attributes
-        [Required]
-        public string area_name { get; set; }
-        public double latitude { get; set; }
-        public double longtitude { get; set; }
-        // Necessary to install System.Drawing.Common from NuGet for Image class
-        [Required]
-        public Image qr_code { get; set; }
-
-        // foreign key for the company
-        public int company_id { get; set; }
-
-        // Navigation Properties
-        public Company company { get; set; }
-
-        public Area() { }
-
+        public virtual Company Company { get; set; }
     }
 }

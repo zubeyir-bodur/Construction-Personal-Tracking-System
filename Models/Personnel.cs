@@ -1,49 +1,29 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Construction_Personal_Tracking_System.Models;
-using System.ComponentModel.DataAnnotations.Schema;
-using Construction_Personal_Tracking_System.Utils;
-using System.ComponentModel.DataAnnotations;
 
-// Change the path later for organization
-namespace Construction_Personal_Tracking_System.Models
+#nullable disable
+
+namespace Construction_Personal_Tracking_System.Deneme
 {
-    public class Personnel
+    public partial class Personnel
     {
-        // primary key
-        public int personnel_id { get; set; }
+        public Personnel()
+        {
+            Leaves = new HashSet<Leave>();
+            Trackings = new HashSet<Tracking>();
+        }
 
-        // attributes
+        public int PersonnelId { get; set; }
+        public string PersonnelName { get; set; }
+        public string PersonnelSurname { get; set; }
+        public int PersonnelTypeId { get; set; }
+        public int CompanyId { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
 
-        [Required]
-        public string personnel_name { get; set; }
-
-        [Required]
-        public string personnel_surname { get; set; }
-
-        [Required]
-        public string username { get; set; }
-
-        [Required]
-        public string password { get; set; }
-        // Do we use UserInfo in the database or in model?
-        //public UserInfo userInfo { get; set; }
-
-        // foreign keys
-        public int company_id { get; set; }
-        public int personnel_type_id { get; set; }
-
-
-        // Navigation Properties
-        public Company company{ get; set; }
-        public PersonnelType personnelType { get; set; }
-        // Leave should allow nulls, so it is not required
-        public Leave leave { get; set; }
-        public ICollection<Tracking> trackings { get; set; }
-
-        public Personnel() { }
+        public virtual Company Company { get; set; }
+        public virtual PersonnelType PersonnelType { get; set; }
+        public virtual ICollection<Leave> Leaves { get; set; }
+        public virtual ICollection<Tracking> Trackings { get; set; }
     }
 }

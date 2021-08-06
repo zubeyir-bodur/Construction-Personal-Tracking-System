@@ -1,24 +1,20 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Construction_Personal_Tracking_System.Models;
-using System.ComponentModel.DataAnnotations.Schema;
 
-// Change the path later for organization
-namespace Construction_Personal_Tracking_System.Models
+#nullable disable
+
+namespace Construction_Personal_Tracking_System.Deneme
 {
-    public class PersonnelType
+    public partial class PersonnelType
     {
-        // Primary Key
-        public int personnel_type_id { get; set; }
-        public string personnel_type_name { get; set; }
+        public PersonnelType()
+        {
+            Personnel = new HashSet<Personnel>();
+        }
 
-        // Navigation Properties
-        public ICollection<Personnel> personnels{ get; set; }
-        
+        public int PersonnelTypeId { get; set; }
+        public string PersonnelTypeName { get; set; }
 
-        public PersonnelType() { }
+        public virtual ICollection<Personnel> Personnel { get; set; }
     }
 }

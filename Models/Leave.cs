@@ -1,33 +1,17 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Construction_Personal_Tracking_System.Models;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 
-// Change the path later for organization
-namespace Construction_Personal_Tracking_System.Models
+#nullable disable
+
+namespace Construction_Personal_Tracking_System.Deneme
 {
-    public class Leave
+    public partial class Leave
     {
-        // primary key
-        public int leave_id { get; set; }
+        public int LeaveId { get; set; }
+        public DateTime LeaveStart { get; set; }
+        public DateTime LeaveEnd { get; set; }
+        public int PersonnelId { get; set; }
 
-        // attributes
-        [Required]
-        [Column(TypeName = "smalldatetime")]
-        public DateTime leave_start { get; set; }
-        [Required]
-        [Column(TypeName = "smalldatetime")]
-        public DateTime leave_end { get; set; }
-
-        // foreign key
-        public int personnel_id { get; set; }
-
-        // Navigation property
-        public Personnel personnel { get; set; }
-        public Leave() { }
+        public virtual Personnel Personnel { get; set; }
     }
 }

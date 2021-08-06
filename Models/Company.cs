@@ -1,28 +1,22 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Construction_Personal_Tracking_System.Models;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
 
-// Change the path later for organization
-namespace Construction_Personal_Tracking_System.Models
+#nullable disable
+
+namespace Construction_Personal_Tracking_System.Deneme
 {
-    public class Company
+    public partial class Company
     {
-        // primary key
-        public int company_id { get; set; }
+        public Company()
+        {
+            Areas = new HashSet<Area>();
+            Personnel = new HashSet<Personnel>();
+        }
 
-        // attributes
-        [Required]
-        public string company_name { get; set; }
+        public int CompanyId { get; set; }
+        public string CompanyName { get; set; }
 
-        // Navigation Properties
-        public ICollection<Personnel> personnels { get; set; }
-        public ICollection<Area> areas { get; set; }
-
-        public Company() { }
+        public virtual ICollection<Area> Areas { get; set; }
+        public virtual ICollection<Personnel> Personnel { get; set; }
     }
 }
