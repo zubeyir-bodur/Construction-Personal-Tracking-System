@@ -22,6 +22,13 @@ namespace Construction_Personal_Tracking_System.JwtTokenAuthentication {
             this.securityKey = securityKey;
         }
 
+        /// <summary>
+        /// Authenticate user via username and password
+        /// </summary>
+        /// <author>Furkan Calik</author>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns>String: Bearer Token </returns>
         public string Authenticate(string username, string password) {
 
             if (!users.Any(u => u.Key == username && u.Value == password)) {
@@ -34,10 +41,12 @@ namespace Construction_Personal_Tracking_System.JwtTokenAuthentication {
             // TODO: Remove
             Console.WriteLine("TokenKey: " + tokenKey);
 
+            
             var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(new Claim[] {
                     new Claim(ClaimTypes.Name, username)
                 }),
+                // Expiration time: 1 hours
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials =
                 new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
