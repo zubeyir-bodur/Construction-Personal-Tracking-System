@@ -1,4 +1,4 @@
 # Ignore building files
 /bin/*
 /obj/*
-.vs/
+/.vs
