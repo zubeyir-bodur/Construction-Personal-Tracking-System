@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Controller",
+    "\\Data",
+    "\\JwtTokenAuthentication",
+    "\\Models"
+  ],
+  "SelectedNode": "\\Models\\Tracking.cs",
+  "PreviewInSolutionExplorer": false
+}
