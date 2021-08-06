@@ -64,5 +64,37 @@ namespace Construction_Personal_Tracking_System.Controller {
             }
             return Ok("Get method");
         }
+
+        /// <summary>
+        /// Generates JSON & Excel files for a given area
+        /// Includes tracking information of different personnels
+        /// Which persennels visited this sector etc.
+        /// </summary>
+        /// <author>Zubeyir Bodur</author>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="areaID"></param>
+        /// 
+        private void FilesArea(DateTime startDate, DateTime endDate, int areaID) {
+            // 1. filter the trackings table
+
+            // 2.1 use json serializer
+            // 2.2 generate excel table
+        }
+
+        /// <summary>
+        /// Generates JSON & Excel files for a given personnel
+        /// Includes tracking information of a personnel, which sectors they visited
+        /// </summary>
+        /// <author>Zubeyir Bodur</author>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="areaID"></param>
+        private void FilesPersonnel(int personnelID, DateTime startDate, DateTime endDate) {
+            // 1. filter the trackings table
+
+            // 2.1 use json serializer
+            // 2.2 generate excel table
+        }
     }
 }
