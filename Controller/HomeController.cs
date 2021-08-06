@@ -80,5 +80,13 @@ namespace Construction_Personal_Tracking_System.Controller {
             }
             return Ok("Get method");
         }
+
+        /// <summary>
+        /// Automatically exits the user from previous sector if necessary
+        /// </summary>
+        /// <param name="PersonnelID"></param>
+        private void AutoExit(int PersonnelID) { 
+        
+        }
     }
 }
