@@ -1,4 +1,6 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Construction_Personal_Tracking_System.Deneme;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,16 +12,14 @@ using System.Threading.Tasks;
 namespace Construction_Personal_Tracking_System.JwtTokenAuthentication {
     public class JwtTokenAuthenticationManager : IJwtTokenAuthenticationManager {
 
-        // Database integration here
-        public IDictionary<string, string> users = new Dictionary<string, string> {
-            {"user1", "password1"},
-            {"user2", "password2"}
-        };
-
         public readonly string securityKey;
+        public readonly PersonelTakipDBContext context;
+        public readonly IConfiguration Configuration;
 
-        public JwtTokenAuthenticationManager(string securityKey) {
-            this.securityKey = securityKey;
+        public JwtTokenAuthenticationManager(PersonelTakipDBContext context, IConfiguration configuration) {
+            this.Configuration = configuration;
+            this.securityKey = Configuration.GetSection("SecretKey").GetSection("Key").Value;
+            this.context = context;
         }
 
         /// <summary>
@@ -31,20 +31,23 @@ namespace Construction_Personal_Tracking_System.JwtTokenAuthentication {
         /// <returns>String: Bearer Token </returns>
         public string Authenticate(string username, string password) {
 
-            if (!users.Any(u => u.Key == username && u.Value == password)) {
+            Personnel personnel = context.Personnel.Where(u => u.UserName.Equals(username)).FirstOrDefault();
+            PersonnelType role = context.PersonnelTypes.Where(u => u.PersonnelTypeId == personnel.PersonnelTypeId).FirstOrDefault();
+            if(personnel == null) {
                 return null;
             }
+            if (!personnel.Password.Equals(password)) {
+                return null;
+            }
+
             //Creating Token regarding security key
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenKey = Encoding.ASCII.GetBytes(securityKey);
 
-            // TODO: Remove
-            Console.WriteLine("TokenKey: " + tokenKey);
-
-            
             var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(new Claim[] {
-                    new Claim(ClaimTypes.Name, username)
+                    new Claim(ClaimTypes.Name, username),
+                    new Claim(ClaimTypes.Role, role.PersonnelTypeName)
                 }),
                 // Expiration time: 1 hours
                 Expires = DateTime.UtcNow.AddHours(1),
