@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Construction_Personal_Tracking_System.Deneme;
+using System.IO;
 
 namespace Construction_Personal_Tracking_System.Controller {
 
@@ -64,7 +65,7 @@ namespace Construction_Personal_Tracking_System.Controller {
             }
             return Ok("Get method");
         }
-        
+
 
         /// <summary>
         /// Generates JSON & Excel files for a given area
@@ -76,25 +77,27 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <param name="areaName">area name that is coming from the front end</param>
-        /// 
+        /// For now, we can pass the following parameters to the URL to test this methods
+        /// http://localhost:5000/home/files-area?startDate=8-3-2021-00:00&&endDate=8-4-2021-00020&&areaID=2000
+        /// TO DO put a proper URL
+        [HttpGet("files-area")]
         public IActionResult FilesArea(DateTime startDate, DateTime endDate, int? areaId) {
             // 1. filter the trackings table
             // verify if the area exists
             if (areaId == null)
-                return NotFound();
+                return NotFound("Area ID is missing");
             var area = context.Areas.Where(a => a.AreaId == areaId).FirstOrDefault();
             if (area == null)
-                return NotFound(); // Return NotFound page for now
-            // comparing the entry date and id will be enough
+                return NotFound("Area can't be found in the database"); // Return NotFound for now
             var filtered = context.Trackings.Where(t => t.AreaName.Equals(area.AreaName)
                 && t.EntranceDate.CompareTo(startDate) >= 0
                 && t.EntranceDate.CompareTo(endDate) <= 0);
             // 2.1 use json serializer
             var JsonString = JsonConvert.SerializeObject(filtered.ToList());
-            // TO DO : output the string into a json file 
+            System.IO.File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "area-personnels.json"), JsonString);
             // 2.2 generate excel table
             // TO DO
-            return Ok();
+            return Ok("Files for the given area");
         }
 
         /// <summary>
@@ -105,6 +108,10 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
         /// <param name="areaID"></param>
+        /// For now, we can pass the following parameters to the URL to test this methods
+        /// http://localhost:5000/home/files-personnel?personnelID=8001&&startDate=8-3-2021-00:00&&endDate=8-4-2021-00020
+        /// TO DO put a proper URL
+        [HttpGet("files-personnel")]
         public IActionResult FilesPersonnel(int? personnelID, DateTime startDate, DateTime endDate) {
             // 1. filter the trackings table
             // verify if the personnal exists
@@ -113,17 +120,15 @@ namespace Construction_Personal_Tracking_System.Controller {
             var personnel = context.Personnel.Where(p => p.PersonnelId == personnelID).FirstOrDefault();
             if (personnel == null)
                 return NotFound(); // Return NotFound page for now
-            // comparing the entry date and id will be enough
             var filtered = context.Trackings.Where(t => t.PersonnelId == personnel.PersonnelId
                 && t.EntranceDate.CompareTo(startDate) >= 0
                 && t.EntranceDate.CompareTo(endDate) <= 0);
             // 2.1 use json serializer
             var JsonString = JsonConvert.SerializeObject(filtered.ToList());
-            // TO DO : output the string into a json file 
+            System.IO.File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "personnel-areas.json"), JsonString);
             // 2.2 generate excel table
             // TO DO
-            return Ok();
+            return Ok("Files for the given personnel");
         }
-
     }
 }

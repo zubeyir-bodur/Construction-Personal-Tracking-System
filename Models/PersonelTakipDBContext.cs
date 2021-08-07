@@ -30,7 +30,7 @@ namespace Construction_Personal_Tracking_System.Deneme
             if (!optionsBuilder.IsConfigured)
             {
                 // TODO: Remove here the connection string and put it appsettings.json
-                optionsBuilder.UseSqlServer("Data Source=DESKTOP-A2IO9DQ;Initial Catalog=PersonelTakipDB;Integrated Security=True;MultipleActiveResultSets=True");
+                optionsBuilder.UseSqlServer("Data Source=DESKTOP-24P0SDH\\SQLEXPRESS;Initial Catalog=PersonelTakipDB;Integrated Security=True;MultipleActiveResultSets=True");
             }
         }
 
