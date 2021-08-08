@@ -2,6 +2,7 @@
 using System.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
 #nullable disable
 
@@ -9,13 +10,13 @@ namespace Construction_Personal_Tracking_System.Deneme
 {
     public partial class PersonelTakipDBContext : DbContext
     {
-        public PersonelTakipDBContext()
-        {
-        }
 
-        public PersonelTakipDBContext(DbContextOptions<PersonelTakipDBContext> options)
+        public readonly IConfiguration Configuration;
+
+        public PersonelTakipDBContext(DbContextOptions<PersonelTakipDBContext> options, IConfiguration configuration)
             : base(options)
         {
+            this.Configuration = configuration;
         }
 
         public virtual DbSet<Area> Areas { get; set; }
@@ -29,8 +30,7 @@ namespace Construction_Personal_Tracking_System.Deneme
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // TODO: Remove here the connection string and put it appsettings.json
-                optionsBuilder.UseSqlServer("Data Source=DESKTOP-24P0SDH\\SQLEXPRESS;Initial Catalog=PersonelTakipDB;Integrated Security=True;MultipleActiveResultSets=True");
+                optionsBuilder.UseSqlServer(Configuration.GetConnectionString("PersonelTakipDBContext"));
             }
         }
 
