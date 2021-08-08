@@ -105,6 +105,7 @@ namespace Construction_Personal_Tracking_System.Controller {
             if (!lastTracking.AutoExit && lastTracking.ExitDate == null) {
                 lastTracking.AutoExit = true;
                 lastTracking.ExitDate = DateTime.UtcNow;
+                context.SaveChanges();
             }
 
             return Ok("auto exit process executed for " + personnel.PersonnelName);
