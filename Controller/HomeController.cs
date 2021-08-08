@@ -82,10 +82,10 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// <param name="endDate"></param>
         /// <param name="areaName">area name that is coming from the front end</param>
         /// For now, we can pass the following parameters to the URL to test this methods
-        /// http://localhost:5000/home/files-area?startStr=08%2F01%2F2021+03%3A00%3A00&&endStr=08%2F31%2F2021+15%3A00%3A00&&areaID=2001
+        /// http://localhost:5000/home/files-area?startStr=08%2F01%2F2021+03%3A00%3A00&&endStr=08%2F31%2F2021+15%3A00%3A00&&areaID=2001&&companyID=1000
         /// TO DO put a proper URL
         [HttpGet("files-area")]
-        public IActionResult FilesArea(string startStr, string endStr, int? areaId){
+        public IActionResult FilesArea(int? areaID, int? companyID, string startStr, string endStr){
             // Create date time objects from incoming url string
             DateTime startDate = DateTime.Parse(new string(WebUtility.UrlDecode(startStr))
                 , System.Globalization.CultureInfo.InvariantCulture).ToLocalTime();
@@ -93,21 +93,55 @@ namespace Construction_Personal_Tracking_System.Controller {
                 , System.Globalization.CultureInfo.InvariantCulture).ToLocalTime();
             // 1. filter the trackings table
             // verify if the area exists
-            if (areaId == null)
+            if (areaID == null)
                 return NotFound("Area ID is missing");
-            var area = context.Areas.Where(a => a.AreaId == areaId).FirstOrDefault();
+            var area = context.Areas.Where(a => a.AreaId == areaID).FirstOrDefault();
+
+            var company = context.Companies.Where(c => c.CompanyId == companyID).FirstOrDefault();
+            if (company == null)
+                return NotFound("Company can't be found"); // Return NotFound page for now
+
             if (area == null)
                 return NotFound("Area can't be found in the database"); // Return NotFound for now
             var filtered = context.Trackings.Where(t => t.AreaName.Equals(area.AreaName)
+                && t.CompanyName.Equals(company.CompanyName)
                 && t.EntranceDate.CompareTo(startDate) >= 0
                 && t.EntranceDate.CompareTo(endDate) <= 0);
+
             // 2.1 use json serializer
             var list = filtered.ToList();
-            var path = "files\\area-personnels.json";
-            var JsonString = JsonConvert.SerializeObject(list);
-            System.IO.File.WriteAllText(path, JsonString);
+            var path = "files\\area-personnels";
+            var listOfRep = new List<TrackReport>();
+            // Generate List of TrackReport objects to give the client
+            foreach (var item in list)
+            {
+                int state = -1;
+                if (item.AutoExit)
+                    state = 0;
+                else if (!item.AutoExit && item.ExitDate == null)
+                    state = 2;
+                else
+                    state = 1;
+                var rep = new TrackReport
+                {
+                    Name = item.Name,
+                    Surname = item.Surname,
+                    Role = item.PersonnelType,
+                    Company = item.CompanyName,
+                    Area = item.AreaName,
+                    EntranceDate = item.EntranceDate.ToString("g", new CultureInfo("fr-FR")),
+                    ExitDate = item.ExitDate.Value.ToString("g", new CultureInfo("fr-FR")),
+                    ExitType = (Exit)state
+                };
+                listOfRep.Add(rep);
+            }
+            var JsonString = JsonConvert.SerializeObject(listOfRep, Formatting.Indented, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            System.IO.File.WriteAllText(path + ".json", JsonString);
             // 2.2 generate excel table
-            ExportExcel(list, startDate, path);
+            ExportExcel(listOfRep, startDate, path);
             return Ok("Files for the given area");
         }
 
@@ -156,7 +190,7 @@ namespace Construction_Personal_Tracking_System.Controller {
             var path = "files\\personnel-areas";
             var listOfRep = new List<TrackReport>();
             // Generate List of TrackReport objects to give the client
-            foreach (var item in list) {;
+            foreach (var item in list) {
                 int state = -1;
                 if (item.AutoExit)
                     state = 0;
@@ -227,7 +261,7 @@ namespace Construction_Personal_Tracking_System.Controller {
                     int j = 1;
                     foreach (var propertyInfo in properties)
                     {
-                        workSheet.Cells[i, j].Value = propertyInfo.GetValue(item).ToString();
+                        workSheet.Cells[i, j].Value = propertyInfo.GetValue(item);
                         j++;
                     }
                     i++;
