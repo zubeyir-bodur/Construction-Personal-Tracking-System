@@ -22,7 +22,7 @@ namespace Construction_Personal_Tracking_System.Controller {
         public PersonelTakipDBContext context;
         // Database integration
 
-        public HomeController( IJwtTokenAuthenticationManager jwtTokenAuthenticationManager, PersonelTakipDBContext Context) {
+        public HomeController(IJwtTokenAuthenticationManager jwtTokenAuthenticationManager, PersonelTakipDBContext Context) {
             this.jwtTokenAuthenticationManager = jwtTokenAuthenticationManager;
             context = Context;
         }
@@ -37,7 +37,7 @@ namespace Construction_Personal_Tracking_System.Controller {
         [HttpPost("authenticate")]
         public IActionResult Login([FromBody] UserInfo userInfo) {
             string token = jwtTokenAuthenticationManager.Authenticate(userInfo.username, userInfo.password);
-            if(token == null) {
+            if (token == null) {
                 return Unauthorized();
             }
             string jsonToken = JsonConvert.SerializeObject(token);
@@ -78,6 +78,36 @@ namespace Construction_Personal_Tracking_System.Controller {
         // [Authorize(Policy = "Deneme")]
         public IActionResult Get() {
             return Ok("Get method");
+        }
+
+        /// <summary>
+        /// Automatically exits the user from previous sector if necessary
+        /// </summary>
+        /// <author>Zubeyir Bodur</author>
+        /// <param name="PersonnelID"></param>
+        /// http://localhost:5000/home/auto-exit?PersonnelID=8000
+        [HttpPost("auto-exit")]
+        public IActionResult AutoExit(int? PersonnelID) {
+            if (PersonnelID == null)
+                return NotFound("ID is missing");
+            var personnel = context.Personnel.Where(p => p.PersonnelId == PersonnelID).FirstOrDefault();
+            if (personnel == null)
+                return NotFound("No such personal exists");
+            // 1. find the last entry
+            var trackingsOfP = context.Trackings.Where(t => t.PersonnelId == PersonnelID);
+            var lastTracking = trackingsOfP.OrderBy(t => t.EntranceDate).LastOrDefault();
+
+            if (lastTracking == null)
+                return Ok("No tracking found, no auto exit required");
+            // 2. if auto exit is false and exit date is null, set auto exit as true
+            // and set the exit date as DateTime.Now
+            if (!lastTracking.AutoExit && lastTracking.ExitDate == null) {
+                lastTracking.AutoExit = true;
+                lastTracking.ExitDate = DateTime.UtcNow;
+                context.SaveChanges();
+            }
+
+            return Ok("auto exit process executed for " + personnel.PersonnelName);
         }
     }
 }
