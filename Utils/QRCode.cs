@@ -11,7 +11,7 @@ namespace Construction_Personal_Tracking_System.Utils {
         public string Username { get; set; }
         public string CompanyName { get; set; }
         public string SectorName { get; set; }
-        public double Latitude { get; set; }
-        public double Longitute { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitute { get; set; }
     }
 }
