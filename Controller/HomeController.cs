@@ -8,13 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Construction_Personal_Tracking_System.Deneme;
-using Construction_Personal_Tracking_System.Utils;
 using System.IO;
 using System.Net;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System.Globalization;
-using static Construction_Personal_Tracking_System.Utils.TrackReport;
 
 namespace Construction_Personal_Tracking_System.Controller {
 
@@ -52,7 +50,7 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// <summary>
         /// Registering QR code to database after a user logged in successfully
         /// </summary>
-        /// <author>Furkan Çalık</author>
+        /// <author>Furkan Çalık, Zubeyir Bodur</author>
         /// <param name="_QRCode"></param>
         /// <returns></returns>
         /// http://localhost:5000/home/registerQRCode [POST]
@@ -84,11 +82,56 @@ namespace Construction_Personal_Tracking_System.Controller {
             tracking.PersonnelId = person.PersonnelId;
             tracking.PersonnelType = type.PersonnelTypeName;
             tracking.CompanyName = company.CompanyName;
-            tracking.AutoExit = false;
-            tracking.EntranceDate = DateTime.UtcNow;
+
+            int LastID = context.Trackings.OrderBy(t => t.TrackingId).LastOrDefault().TrackingId;
+            tracking.TrackingId = LastID + 1; //just add 1 for a brand new row
+            tracking.EntranceDate = DateTime.UtcNow; // default case, entry
             tracking.ExitDate = null;
+            tracking.AutoExit = false;
+
             tracking.AreaName = _QRCode.SectorName;
-            context.Add<Tracking>(tracking);
+
+            //Auto Exit procedure
+            var personnel = context.Personnel.Where(p => p.PersonnelId == tracking.PersonnelId).FirstOrDefault();
+            // 1. find the last recent tracking
+            var trackingsOfP = context.Trackings.Where(t => t.PersonnelId == tracking.PersonnelId);
+            var lastTrackingOfP = trackingsOfP.OrderBy(t => t.EntranceDate).LastOrDefault();
+
+            if (lastTrackingOfP != null) // base case for a new worker
+            {
+                if (lastTrackingOfP.ExitDate == null)
+                { // entry was made recently
+                    if (lastTrackingOfP.AreaName.Equals(tracking.AreaName)) // second scan from same sector == exit
+                    {
+                        tracking.TrackingId = lastTrackingOfP.TrackingId; // same row, where the entry has been made should be changed
+                        tracking.EntranceDate = lastTrackingOfP.EntranceDate; // no change should be in entry date
+                        tracking.ExitDate = DateTime.UtcNow; // have the personnel exit
+                        context.Update<Tracking>(tracking); // update that row
+                    }
+                    else
+                    {   // Forgot to exit, auto exit initiate
+                        // 1.1 Entry to a new sector 
+                        tracking.EntranceDate = DateTime.UtcNow; ;
+                        tracking.ExitDate = null;
+                        // 1.2 AutoExit from lastTrackingOfP
+                        lastTrackingOfP.AutoExit = true;
+                        lastTrackingOfP.ExitDate = DateTime.UtcNow;
+
+                        // update old row and add new row
+                        context.Update<Tracking>(lastTrackingOfP);
+                        context.Add<Tracking>(tracking);
+                    }
+                }
+                else
+                {
+                    // exit date was not null, so it was an entry
+                    context.Add<Tracking>(tracking);
+                    // need to add a new row
+                }
+            }
+            else {
+                context.Add<Tracking>(tracking);
+            }
             context.SaveChanges();
             return Ok();
         }
@@ -115,6 +158,7 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// http://localhost:5000/home/files-area?startStr=08%2F01%2F2021+03%3A00%3A00&&endStr=08%2F31%2F2021+15%3A00%3A00&&areaID=2001&&companyID=1000
         /// TO DO put a proper URL
         [HttpGet("files-area")]
+        //[AllowAnonymous] Uncomment to test the method using URL above
         public IActionResult FilesArea(int? areaID, int? companyID, string startStr, string endStr){
             // Create date time objects from incoming url string
             DateTime startDate = DateTime.Parse(new string(WebUtility.UrlDecode(startStr))
@@ -161,7 +205,7 @@ namespace Construction_Personal_Tracking_System.Controller {
                     Area = item.AreaName,
                     EntranceDate = item.EntranceDate.ToString("g", new CultureInfo("fr-FR")),
                     ExitDate = item.ExitDate.Value.ToString("g", new CultureInfo("fr-FR")),
-                    ExitType = (Exit)state
+                    ExitType = (TrackReport.Exit)state
                 };
                 listOfRep.Add(rep);
             }
@@ -187,6 +231,7 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// http://localhost:5000/home/files-personnel?companyID=1001&&personnelID=8001&&startStr=08%2F01%2F2021+03%3A00%3A00&&endStr=08%2F31%2F2021+15%3A00%3A00
         /// TO DO put a proper URL
         [HttpGet("files-personnel")]
+        //[AllowAnonymous] Uncomment to test the method using URL above
         public IActionResult FilesPersonnel(int? personnelID, int? companyID, string startStr, string endStr) {
             // Create date time objects from incoming url string
             DateTime startDate = DateTime.Parse(new string(WebUtility.UrlDecode(startStr))
@@ -236,7 +281,7 @@ namespace Construction_Personal_Tracking_System.Controller {
                     Area = item.AreaName,
                     EntranceDate = item.EntranceDate.ToString("g", new CultureInfo("fr-FR")),
                     ExitDate = item.ExitDate.Value.ToString("g", new CultureInfo("fr-FR")),
-                    ExitType = (Exit)state
+                    ExitType = (TrackReport.Exit)state
                 };
                 listOfRep.Add(rep);
             }
@@ -337,36 +382,6 @@ namespace Construction_Personal_Tracking_System.Controller {
                 index++;
             }
             return s;
-        }
-        
-        /// <summary>
-        /// Automatically exits the user from previous sector if necessary
-        /// </summary>
-        /// <author>Zubeyir Bodur</author>
-        /// <param name="PersonnelID"></param>
-        /// http://localhost:5000/home/auto-exit?PersonnelID=8000
-        [HttpPost("auto-exit")]
-        public IActionResult AutoExit(int? PersonnelID) {
-            if (PersonnelID == null)
-                return NotFound("ID is missing");
-            var personnel = context.Personnel.Where(p => p.PersonnelId == PersonnelID).FirstOrDefault();
-            if (personnel == null)
-                return NotFound("No such personal exists");
-            // 1. find the last entry
-            var trackingsOfP = context.Trackings.Where(t => t.PersonnelId == PersonnelID);
-            var lastTracking = trackingsOfP.OrderBy(t => t.EntranceDate).LastOrDefault();
-
-            if (lastTracking == null)
-                return Ok("No tracking found, no auto exit required");
-            // 2. if auto exit is false and exit date is null, set auto exit as true
-            // and set the exit date as DateTime.Now
-            if (!lastTracking.AutoExit && lastTracking.ExitDate == null) {
-                lastTracking.AutoExit = true;
-                lastTracking.ExitDate = DateTime.UtcNow;
-                context.SaveChanges();
-            }
-
-            return Ok("auto exit process executed for " + personnel.PersonnelName);
         }
     }
 }
