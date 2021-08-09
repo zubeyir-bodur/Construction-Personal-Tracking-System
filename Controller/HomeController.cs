@@ -142,7 +142,7 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// http://localhost:5000/home/files-area?startStr=08%2F01%2F2021+03%3A00%3A00&&endStr=08%2F31%2F2021+15%3A00%3A00&&areaID=2001&&companyID=1000
         /// TO DO put a proper URL
         [HttpGet("files-area")]
-        [AllowAnonymous]
+        //[AllowAnonymous] Uncomment to test the method using URL above
         public IActionResult FilesArea(int? areaID, int? companyID, string startStr, string endStr){
             // Create date time objects from incoming url string
             DateTime startDate = DateTime.Parse(new string(WebUtility.UrlDecode(startStr))
@@ -215,7 +215,7 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// http://localhost:5000/home/files-personnel?companyID=1001&&personnelID=8001&&startStr=08%2F01%2F2021+03%3A00%3A00&&endStr=08%2F31%2F2021+15%3A00%3A00
         /// TO DO put a proper URL
         [HttpGet("files-personnel")]
-        [AllowAnonymous]
+        //[AllowAnonymous] Uncomment to test the method using URL above
         public IActionResult FilesPersonnel(int? personnelID, int? companyID, string startStr, string endStr) {
             // Create date time objects from incoming url string
             DateTime startDate = DateTime.Parse(new string(WebUtility.UrlDecode(startStr))
