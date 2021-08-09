@@ -58,6 +58,22 @@ namespace Construction_Personal_Tracking_System.Controller {
         /// http://localhost:5000/home/registerQRCode [POST]
         [HttpPost("registerQRCode")]
         public IActionResult RegisterQRCode([FromBody] QRCode _QRCode) {
+            if(_QRCode.Username == null) {
+                return NotFound("Username is not found.");
+            }
+            if (_QRCode.SectorName == null) {
+                return NotFound("SectorName is not found.");
+            }
+            if (_QRCode.CompanyName == null) {
+                return NotFound("CompanyName is not found.");
+            }
+            if (_QRCode.Latitude == null) {
+                return NotFound("Latitude is not found.");
+            }
+            if (_QRCode.Longitute == null) {
+                return NotFound("Longitute is not found.");
+            }
+
             Tracking tracking = new Tracking();
             Personnel person = context.Personnel.Where(u => u.UserName == _QRCode.Username).FirstOrDefault();
             PersonnelType type = context.PersonnelTypes.Where(u => u.PersonnelTypeId == person.PersonnelTypeId).FirstOrDefault();
