@@ -1,5 +1,5 @@
 ## Construction Personal Tracking System
-
+Note: This repostory is archived and is now read only. For the completed project, see [personnel-tracking](https://github.com/zubeyir-bodur/personnel-tracking)
 ### Cloning the repository into VS 2019:
 1. Make sure you have downloaded visual studio 2019 and the following:
   - ASP.Net ile Web Geliştirme
